@@ -1,4 +1,6 @@
 <?php
+	session_start();
+	
 	include('config.php');
 	$target_dir = "uploads/";
 	if ($_SERVER['REQUEST_METHOD'] === 'POST'){
@@ -53,9 +55,9 @@
 				$result = $mysqli->query($query);
 								
 				if ($result && $result->num_rows > 0){
-					$res = array('status' => 'failed', 'message'=> 'User email or User name is already existed!');					
+					$res = array('status' => 'danger', 'message'=> 'User email or User name is already existed!');					
 				}else if ($password != $confirm){
-					$res = array('status' => 'failed', 'message'=> "Password and confirm password are not matched!");
+					$res = array('status' => 'danger', 'message'=> "Password and confirm password are not matched!");
 				}else{
 					$hash = password_hash($password, PASSWORD_DEFAULT);
 					$mysqli->query("INSERT into `users` (`username`, `email`, `password`) VALUES ('" . $username . "','" . $email . "','" . $hash  . "')");
@@ -71,18 +73,18 @@
 				if ($result){
 					$data = $result->fetch_assoc();
 					if (!password_verify($password, $data['password'])){
-						$res = array('status' => 'failed', 'message'=> "Invalid Password");
+						$res = array('status' => 'danger', 'message'=> "Invalid Password");
 					}else{
 						$res = array('status' => 'success', 'message'=> "Successfully login");
 						$_SESSION['username'] = $username;
 						$_SESSION['userid'] = $data['id'];
 					}
 				}else{
-					$res = array('status' => 'failed', 'message'=> "The user is not existed");
+					$res = array('status' => 'danger', 'message'=> "The user is not existed");
 				}
 				echo json_encode($res);
 				break;
 			default:
-				echo json_encode(array("status => 'failed", 'message' => 'No type action'));
+				echo json_encode(array("status => 'danger", 'message' => 'No type action'));
 		}
 	}

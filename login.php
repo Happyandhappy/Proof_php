@@ -5,25 +5,6 @@
 
 	unset($_SESSION['username']);
 	unset($_SESSION['userid']);
-	
-	/* verify credentials with database user information */
-    if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-        $username = $_POST['username'];
-        $password = $_POST['password'];        
-        $result = $mysqli->query("SELECT * from `users` WHERE `username`='" . mysqli_real_escape_string($mysqli, $username) . "'");
-        if ($result){
-            $data = $result->fetch_assoc();
-            if (!password_verify($password, $data['password'])){
-                $error = "Invalid Password";
-            }else{
-				$error = "Successfully login";
-				$_SESSION['username'] = $username;				
-				header('Location: index.php');
-            }            
-        }else{
-            $error = "The user is not existed.";
-        }        
-    }
 ?>
 
 <div class="container login">
@@ -46,16 +27,16 @@
 					<div class="row">
 						<div class="col-lg-12">
 							<form id="login-form" method="post" role="form">
-								<?php 
-									if (isset($error)){
-										echo "<div class='alert alert-danger'>" . $error . "</div>";
-									}
-								?>
-								<div class="form-group">
-									<input type="text" name="username" class="form-control" placeholder="Username" value="" autocomplete="off" required>
+								<input type="hidden" name="type" value="login">
+								<div class="alert alert-danger alert-dismissible hidden" id="alert">
+									<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+									<p id="alert_content"></p>
 								</div>
 								<div class="form-group">
-									<input type="password" name="password" class="form-control" placeholder="Password" autocomplete="off" required>
+									<input type="text" name="username" class="form-control" placeholder="Username" value="" minlength="4" required>
+								</div>
+								<div class="form-group">
+									<input type="password" name="password" class="form-control" placeholder="Password" minlength="4" required>
 								</div>
 								<div class="form-group">
 									<div class="row">
@@ -72,3 +53,7 @@
 		</div>
 	</div>
 </div>
+
+
+<?php 
+	include "components/footer.php"; 

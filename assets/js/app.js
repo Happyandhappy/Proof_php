@@ -1,3 +1,10 @@
+function showAlert(res) {
+  $alert = $("#alert");
+  $alert.attr("class", "alert alert-" + res.status + " alert-dismissible");
+  $alert.removeClass("hidden");
+  $("#alert_content").html(res.message);
+}
+
 $(document).ready(function() {
   $("#form").on("submit", function(e) {
     $("#load").button("loading");
@@ -25,11 +32,24 @@ $(document).ready(function() {
       window.location.href = this.href;
     }
   });
-});
 
-function showAlert(res) {
-  $alert = $("#alert");
-  $alert.attr("class", "alert alert-" + res.status + " alert-dismissible");
-  $alert.removeClass("hidden");
-  $("#alert_content").html(res.message);
-}
+  // Login & Register
+  $("#login-form, #register-form").on("submit", function(e) {
+    e.preventDefault();
+    var formData = $(this).serialize();
+    $.ajax({
+      url: "Controller.php",
+      type: "post",
+      data: formData,
+      success: function(res) {
+        var data = JSON.parse(res);
+        showAlert(data);
+        if (data.status === "success") {
+          setTimeout(() => {
+            window.location.href = "index.php";
+          }, 1000);
+        }
+      }
+    });
+  });
+});

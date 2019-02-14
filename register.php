@@ -45,11 +45,11 @@
 					<div class="row">
 						<div class="col-lg-12">
 							<form id="register-form" method="post" role="form">
-								<?php 
-									if (isset($error)){
-										echo "<div class='alert alert-danger'>" . $error . "</div>";
-									}
-								?>
+								<input type="hidden" name="type" value="register">
+								<div class="alert alert-danger alert-dismissible hidden" id="alert">
+									<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+									<p id="alert_content"></p>
+								</div>
 								<div class="form-group">
 									<input type="text" name="username" class="form-control" placeholder="Username" value="" required>
 								</div>
@@ -57,10 +57,10 @@
 									<input type="email" name="email" class="form-control" placeholder="Email Address" value="" required>
 								</div>
 								<div class="form-group">
-									<input type="password" name="password" class="form-control" placeholder="Password" required>
+									<input type="password" name="password" class="form-control" placeholder="Password" minlength="4" required>
 								</div>
 								<div class="form-group">
-									<input type="password" name="confirm-password" class="form-control" placeholder="Confirm Password" required>
+									<input type="password" name="confirm-password" class="form-control" placeholder="Confirm Password" minlength="4" required>
 								</div>
 								<div class="form-group">
 									<div class="row">
@@ -77,3 +77,6 @@
 		</div>
 	</div>
 </div>
+
+<?php
+ include "components/footer.php";
