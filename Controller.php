@@ -5,38 +5,63 @@
 	$target_dir = "uploads/";
 	if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 		switch($_POST['type']){
+			/**
+			 * Upload new article
+			 */
 			case 'posting':
 				$title = "";
 				$content = "";
-				if (isset($_POST['content'])) $content = $mysqli->real_escape_string($_POST['content']);			
-				$image = "";
-				//if there was an error uploading the file
-				if ( isset($_FILES["file"])) {
-					if ($_FILES["file"]["error"] > 0) {
-						$image = "";
-					}
-					else {
-						// file upload and read csv file as array
-						$words = explode(".", $_FILES["file"]["name"]);
-						$name = uniqid(). '.' . end($words);
-						$storagename = $target_dir . $name;			
-						@move_uploaded_file($_FILES["file"]["tmp_name"], $storagename);
-						$image = $storagename;		        
+				if (isset($_POST['content'])) $content = $mysqli->real_escape_string($_POST['content']);
+				$images = array();
+				//if there was an error uploading the file				
+				if (isset($_FILES["files"])) {
+					foreach($_FILES['files']['name'] as $key=>$val){
+						$image_name = $_FILES['files']['name'][$key];
+						$tmp_name   = $_FILES['files']['tmp_name'][$key];
+						$size       = $_FILES['files']['size'][$key];
+						$type       = $_FILES['files']['type'][$key];
+						$error      = $_FILES['files']['error'][$key];
+
+						if ($error == 0) {
+							// file upload & store to upload directory
+							$words = explode(".", $image_name);
+							$name = uniqid() . '.' . end($words);
+							$storagename = $target_dir . $name;			
+							@move_uploaded_file($tmp_name, $storagename);
+							$image = $storagename;
+							array_push($images, $storagename);
+						}
 					}
 				}
-				if ( $content != "" || $image != ""){
-					$query = "insert into `posting` (`content`,`image`) values('" . $content . "','" . $image . "')";
+
+				if ( $content != "" || count($images) > 0){
+					$query = "insert into `posting` (`userid`,`content`) values (" . $_SESSION['userid'] . ",'" . $content . "')";
+					$mysqli->query($query);
+					$res = $mysqli->query("SELECT LAST_INSERT_ID()");
+					$postid = NULL;
+					if ($res){
+						$data = $res->fetch_assoc();
+						$postid = $data['LAST_INSERT_ID()'];
+					}
 					
-					$result = $mysqli->query($query);
-					if ($result){
-						echo json_encode(array('status' => 'success','message' => 'Successfully saved!'));	
-					}else{
-						echo json_encode(array('status' => 'danger','message' => 'Invalid Data in store to database'));
-					}		
+					if (isset($postid)){
+						foreach($images as $image){
+							$query = "insert into `images` (`postid`,`url`) values(" . $postid . ",'" . $image . "')";					
+							$result = $mysqli->query($query);
+							if (!$result){							
+								echo json_encode(array('status' => 'danger','message' => 'Invalid Data in store to database')); exit;
+							}
+						}
+						echo json_encode(array('status' => 'success','message' => 'Successfully saved!')); exit;
+					}										
 				}else echo json_encode(array('status' => 'danger','message' => 'Invalid Data, Either of Content and Image is required!'));
 				break;
-			case 'posting':
-				$query = "SELECT * FROM `posting` ORDER BY `timestamps` ASC";
+
+			/**
+			 * List of Articles
+			 */
+			case 'listing':
+				$query = "SELECT posting.*, images.url FROM posting INNER JOIN images on posting.id=images.postid ORDER BY posting.timestamps ASC";
 				$result = $mysqli->query($query);
 				if ($result){
 					$data = [];
@@ -45,6 +70,9 @@
 					}
 					echo json_encode($data);
 				}
+			/**
+			 * Register new user
+			 */
 			case 'register':
 				$username = $_POST['username'];
 				$email = $_POST['email'];
@@ -52,6 +80,7 @@
 				$confirm = $_POST['confirm-password'];
 				
 				$query = "SELECT * from `users` WHERE `email`='" . mysqli_real_escape_string($mysqli, $email) . "' OR `username`='" .  mysqli_real_escape_string($mysqli, $username)  . "'";
+				
 				$result = $mysqli->query($query);
 								
 				if ($result && $result->num_rows > 0){
@@ -65,12 +94,17 @@
 				}
 				echo json_encode($res);
 				break;
-			
+				
+			/**
+			 * Login User
+			 */
 			case 'login':
 				$username = $_POST['username'];
-				$password = $_POST['password'];        
-				$result = $mysqli->query("SELECT * from `users` WHERE `username`='" . mysqli_real_escape_string($mysqli, $username) . "'");
-				if ($result){
+				$password = $_POST['password'];
+				$query = "SELECT * from `users` WHERE `username`='" . mysqli_real_escape_string($mysqli, $username) . "'";				
+				$result = $mysqli->query($query);
+				
+				if ($result && $result->num_rows > 0){
 					$data = $result->fetch_assoc();
 					if (!password_verify($password, $data['password'])){
 						$res = array('status' => 'danger', 'message'=> "Invalid Password");

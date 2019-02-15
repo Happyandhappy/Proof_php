@@ -137,3 +137,8 @@ div.panel-body > div.col-md-7 > p {
   background-color: #1ca347;
   border-color: #1ca347;
 }
+
+.row hr {
+  margin-top: 8px;
+  margin-bottom: 5px;
+}

@@ -6,6 +6,7 @@ function showAlert(res) {
 }
 
 $(document).ready(function() {
+  // Post new Article
   $("#form").on("submit", function(e) {
     $("#load").button("loading");
     e.preventDefault();
@@ -26,6 +27,7 @@ $(document).ready(function() {
     });
   });
 
+  // Delete a Article
   $(".delete").on("click", function(e) {
     e.preventDefault();
     if (confirm("Are you sure to delete?")) {
@@ -51,5 +53,16 @@ $(document).ready(function() {
         }
       }
     });
+  });
+
+  $(".mosaic").Mosaic({
+    maxRowHeight: 200,
+    refitOnResize: true,
+    refitOnResizeDelay: false,
+    defaultAspectRatio: 0.5,
+    maxRowHeightPolicy: "tail",
+    highResImagesWidthThreshold: 200,
+    responsiveWidthThreshold: 300,
+    innerGap: 10
   });
 });

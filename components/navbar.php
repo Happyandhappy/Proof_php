@@ -22,7 +22,7 @@
 				<li>
 					<a href="logout.php">
 						<strong>
-							<?php echo $_SESSION['username']; ?>
+							<?php echo ucfirst($_SESSION['username']); ?>
 						</strong>
 						Log Out</a>
 				</li>
