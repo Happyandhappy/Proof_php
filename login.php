@@ -33,7 +33,7 @@
 									<p id="alert_content"></p>
 								</div>
 								<div class="form-group">
-									<input type="text" name="username" class="form-control" placeholder="Username" value="" minlength="4" required>
+									<input type="text" name="username" class="form-control" placeholder="Username" value="" required>
 								</div>
 								<div class="form-group">
 									<input type="password" name="password" class="form-control" placeholder="Password" minlength="4" required>

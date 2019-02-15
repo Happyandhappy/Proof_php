@@ -41,7 +41,7 @@ if (count($data) > 0){
 		echo '</div><div class="col-md-12 row"><hr>' . nl2br($row['content']).'</div>';
 	} else echo nl2br($row['content']); ?>
 		<div class="col-md-12 row">
-			<a href="?page=listing&id=<?php echo $row['postid'];?>" class="delete">Delete</a>
+			<a href="?page=listing&id=<?php echo $row['postid'];?>" class="delete btn btn-danger">Delete</a>
 		</div>
 	</div>
 </div>

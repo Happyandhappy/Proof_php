@@ -142,3 +142,13 @@ div.panel-body > div.col-md-7 > p {
   margin-top: 8px;
   margin-bottom: 5px;
 }
+
+@media only screen and (max-width: 768px) {
+  .mosaic {
+    margin-bottom: 10px !important;
+  }
+}
+
+.delete {
+  margin-top: 5px;
+}
