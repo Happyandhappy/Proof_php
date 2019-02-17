@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (isset($postid)) {
                     foreach ($images as $image) {
-                        $query = "insert into `images` (`postid`,`url`) values(" . $postid . ",'" . REMOTE . "/" . $image . "')";
+                        $query = "insert into `images` (`postid`,`url`) values(" . $postid . ",'" . HOST . "/" . $image . "')";
                         $result = $mysqli->query($query);
                         if (!$result) {
                             echo json_encode(array('status' => 'danger', 'message' => 'Invalid Data in store to database'));exit;
