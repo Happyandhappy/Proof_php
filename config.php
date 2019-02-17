@@ -1,9 +1,9 @@
 <?php
 define("DBHOST", "localhost");
 define("DBUSER", "root");
-define("DBPASS", "");
+define("DBPASS", "password");
 define("DBNAME", "pos");
-define("HOST", "localhost/proof");
+define("HOST",  "http://" . $_SERVER['SERVER_NAME']);
 define("REMOTE", '54.91.26.122');
 
 $mysqli = new mysqli(DBHOST, DBUSER, DBPASS, DBNAME, 3306);
