@@ -1,5 +1,7 @@
 <?php
 include "config.php";
+
+/** get posting data */
 $query = "SELECT posting.*, images.id as image_id, images.url, users.username FROM posting LEFT JOIN images on posting.id=images.postid LEFT JOIN users on posting.userid=users.id ORDER BY posting.timestamps DESC";
 $result = $mysqli->query($query);
 if ($result) {
@@ -40,6 +42,17 @@ if ($result) {
             "timestamps" => $lastrow['timestamps'],
             "images" => $images,
         ));
+    }
+}
+echo json_encode($data);
+echo "||";
+/** get Users data */
+$query = "select * from users";
+$result = $mysqli->query($query);
+$data = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        array_push($data, $row);
     }
 }
 echo json_encode($data);
