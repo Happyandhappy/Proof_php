@@ -3,8 +3,10 @@ define("DBHOST", "localhost");
 define("DBUSER", "root");
 define("DBPASS", "");
 define("DBNAME", "pos");
-define("HOST", "localhost/proof");
-define("REMOTE", '54.91.26.122');
+$externalContent = file_get_contents('http://checkip.dyndns.com/');
+preg_match('/Current IP Address: \[?([:.0-9a-fA-F]+)\]?/', $externalContent, $m);
+$serverip = $m[1];
+if (!isset($serverip) || $serverip == '') exit;
 
 $mysqli = new mysqli(DBHOST, DBUSER, DBPASS, DBNAME, 3306);
 if ($mysqli->connect_errno) {
@@ -12,30 +14,55 @@ if ($mysqli->connect_errno) {
     exit;
 }
 
-$curl = curl_init(REMOTE . "/api.php");
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-$res = curl_exec($curl);
-curl_close($curl);
 
-$splits = explode('||', $res);
-
-$postingStr = $splits[0];
-
-$usersStr = $splits[1];
-$data = json_decode($postingStr);
-
-foreach ($data as $row) {
-    $query1 = "INSERT INTO `rposting` (id, userid, content, timestamps) VALUES (" . $row->postid . "," . $row->userid . ",'" . $mysqli->real_escape_string($row->content) . "','" . $row->timestamps . "')";
-    $mysqli->query($query1);
-    foreach ($row->images as $image) {
-        $query2 = "INSERT INTO `rimages` (id, postid, url, timestamps) VALUES (" . $image->id . "," . $row->postid . ",'" . $image->url . "','" . $row->timestamps . "')";
-        $mysqli->query($query2);
-    }
+function getResponse($ip, $time){
+	$curl = curl_init( $ip . "/api.php?time=" . $time);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+	$res = curl_exec($curl);
+	curl_close($curl);
+	return $res;
 }
 
-$data = json_decode($usersStr);
-foreach ($data as $row) {
-    $query = "INSERT INTO `rusers` (id, username, email, `password`, created_at) VALUES ( " . $row->id . ",'" . $row->username . "','" . $row->email . "','" . $row->password . "','" . $row->created_at . "')";
-    $mysqli->query($query);
+
+$remotes = $mysqli->query("SELECT * from remote");
+if ($remotes){
+	while ($row = $remotes->fetch_assoc()) {
+
+		$ip = $row['ip'];
+		$time = $row['timestamps'];
+
+		if ($ip !== $serverip){
+			$res = getResponse($ip, $time);
+			$data = json_decode($res);
+			foreach ($data as $row) {
+				if (isset($row->postid)){
+					// insert or update rposting data from response
+					$res = $mysqli->query("SELECT COUNT(*) from `rposting` WHERE remote='" . $ip . "' and postid=" . $row->postid);
+
+					// if already existed then update 
+					if ($res && $res->fetch_assoc()['COUNT(*)'] > 0){
+						$query = "UPDATE `rposting` SET username='" . $row->username . "', content='" . $row->content . "', `timestamps` = '" . $row->timestamps ."' WHERE remote='" . $ip . "' and postid=" . $row->postid;
+					}else{
+					// or insert new record
+						$query = "INSERT INTO `rposting` (username, postid , content,`timestamps`, remote) VALUES ('" . $row->username . "',"  . $row->postid .",'" . $row->content . "','" . $row->timestamps . "','" . $ip . "')";	
+					}
+					$mysqli->query($query);
+
+					// insert or update rimages data from response
+					foreach ($row->images as $row1) {
+						$res = $mysqli->query("SELECT COUNT(*) from `rimages` WHERE remote='" . $ip . "' and postid=" . $row->postid . " and imageid=" . $row1->id);
+
+						if ($res && $res->fetch_assoc()['COUNT(*)'] > 0){
+							$query = "UPDATE `rimages` SET url='" . $row1->url . "', `timestamps`='" . $row->timestamps . "' WHERE remote='" . $ip . "', and postid=" . $row->postid . ",imageid=" . $row1->id;
+						}else{
+							$query = "INSERT INTO `rimages` (remote, postid, imageid, url, `timestamps`) VALUES('" . $ip ."'," . $row->postid . "," . $row1->id . ",'" . $row1->url . "','" . $row->timestamps  . "')";
+						}
+						$mysqli->query($query);
+					}
+				}	
+			}			
+		}
+		$mysqli->query("UPDATE `remote` SET `timestamps`=NOW() WHERE `ip`='" . $ip . "'");
+	}
 }

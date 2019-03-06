@@ -7,7 +7,7 @@ if (isset($_GET['id'])) {
     if (isset($row)) {
         $image = $row['url'];
         if (file_exists($image)) {
-            unlink($image);
+            // unlink($image);
         }
 
     }
@@ -64,7 +64,7 @@ if (count($data) > 0) {
     </div>
     <div class="panel-body">
         <p>
-            Post in posting page!
+            Post new in posting page!
         </p>
     </div>
 </div>

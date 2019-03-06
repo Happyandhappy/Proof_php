@@ -45,7 +45,7 @@ if ($result) {
     }
 }
 
-$query = "SELECT rposting.*, rimages.url, rusers.username FROM rposting LEFT JOIN rimages on rposting.id=rimages.postid LEFT JOIN rusers on rposting.userid=rusers.id ORDER BY rposting.timestamps DESC";
+$query = "SELECT rposting.*, rimages.url FROM rposting LEFT JOIN rimages on rposting.postid=rimages.postid ORDER BY rposting.timestamps DESC";
 $result = $mysqli->query($query);
 if ($result) {
     $images = [];
@@ -61,7 +61,6 @@ if ($result) {
             array_push($data, array(
                 'postid' => $postid,
                 'username' => $lastrow['username'],
-                'userid' => $lastrow['userid'],
                 'content' => $lastrow['content'],
                 "timestamps" => $lastrow['timestamps'],
                 "images" => $images,
@@ -80,7 +79,6 @@ if ($result) {
         array_push($data, array(
             'postid' => $lastrow['id'],
             'username' => $lastrow['username'],
-            'userid' => $lastrow['userid'],
             'content' => $lastrow['content'],
             "timestamps" => $lastrow['timestamps'],
             "images" => $images,

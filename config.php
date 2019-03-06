@@ -1,10 +1,10 @@
 <?php
 define("DBHOST", "localhost");
 define("DBUSER", "root");
-define("DBPASS", "password");
+define("DBPASS", "");
 define("DBNAME", "pos");
-define("HOST",  "http://34.227.61.129");
-define("REMOTE", '54.91.26.122');
+$ip = getenv('REMOTE_ADDR', true) ?: getenv('REMOTE_ADDR');
+define("HOST",  "http://" . $ip);
 
 $mysqli = new mysqli(DBHOST, DBUSER, DBPASS, DBNAME, 3306);
 if ($mysqli->connect_errno) {

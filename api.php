@@ -1,9 +1,17 @@
 <?php
 include "config.php";
 
+if (isset($_GET['time'])){
+    echo "[]";
+    exit();
+}
+
+$time = $_GET['time'];
+
 /** get posting data */
-$query = "SELECT posting.*, images.id as image_id, images.url, users.username FROM posting LEFT JOIN images on posting.id=images.postid LEFT JOIN users on posting.userid=users.id ORDER BY posting.timestamps DESC";
+$query = "SELECT posting.*, images.id as image_id, images.url, users.username FROM posting  LEFT JOIN images on posting.id=images.postid LEFT JOIN users ON posting.userid=users.id AND posting.timestamps > '" . $time . "' ORDER BY posting.timestamps DESC";
 $result = $mysqli->query($query);
+$data = [];
 if ($result) {
     $data = [];
     $images = [];
@@ -27,12 +35,13 @@ if ($result) {
             $postid = $row['id'];
             $images = [];
         }
+
         if ($row['url'] != null) {
             array_push($images, array('url' => $row['url'], 'id' => $row['image_id']));
         }
-
         $lastrow = $row;
     }
+
     if (isset($lastrow)) {
         array_push($data, array(
             'postid' => $lastrow['id'],
@@ -42,17 +51,6 @@ if ($result) {
             "timestamps" => $lastrow['timestamps'],
             "images" => $images,
         ));
-    }
-}
-echo json_encode($data);
-echo "||";
-/** get Users data */
-$query = "select * from users";
-$result = $mysqli->query($query);
-$data = [];
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        array_push($data, $row);
     }
 }
 echo json_encode($data);
